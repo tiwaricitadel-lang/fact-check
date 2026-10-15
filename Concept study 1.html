@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Concept study 1</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #f3f3f3;
+    --ph: #d6d6d6;
+    --line: #cfcfcf;
+    --line-strong: #8a8a8a;
+    --text: #1c1c1c;
+    --muted: #5e5e5e;
+    --accent: #2a5fc4;
+    --accent-text: #ffffff;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--bg); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  :focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+  h1:focus, .task-text:focus { outline: none; }
+
+  .btn {
+    font: inherit; font-size: 15px; min-height: 40px; padding: 8px 14px;
+    border: 1px solid var(--line-strong); border-radius: 4px;
+    background: var(--bg); color: var(--text); cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+
+  /* Task banner */
+  .banner {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+    background: var(--surface); border-bottom: 2px solid var(--line-strong);
+    padding: 12px 20px;
+  }
+  .banner-inner { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+  .task-count { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .task-text { margin: 0; flex: 1 1 380px; max-width: 72ch; }
+  .banner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* Product shell */
+  .shell { max-width: 1200px; margin: 0 auto; }
+  .topbar { display: flex; align-items: center; min-height: 56px; padding: 8px 20px; border-bottom: 1px solid var(--line); }
+  .product-name { font-weight: 700; }
+  .switcher { position: relative; }
+  .switcher-btn {
+    font: inherit; font-weight: 700; padding: 6px 10px; cursor: pointer;
+    background: var(--bg); color: var(--text); border: 1px solid var(--line-strong); border-radius: 4px;
+  }
+  .switcher-menu {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 5; min-width: 240px;
+    list-style: none; margin: 0; padding: 4px 0;
+    background: var(--bg); border: 1px solid var(--line-strong); border-radius: 4px;
+  }
+  .switcher-menu button {
+    display: block; width: 100%; text-align: left; font: inherit; color: var(--text);
+    background: none; border: 0; padding: 10px 12px; cursor: pointer;
+  }
+  .switcher-menu button[aria-current="true"] { font-weight: 600; }
+  .sub { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+
+  .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 65vh; }
+  .sidenav { border-right: 1px solid var(--line); padding: 12px 0; }
+  .sidenav ul { list-style: none; margin: 0; padding: 0; }
+  .navbtn {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; color: var(--text);
+    background: none; border: 0; border-left: 4px solid transparent; padding: 10px 16px; cursor: pointer;
+  }
+  .navbtn[aria-current="page"] { border-left-color: var(--accent); color: var(--accent); font-weight: 600; background: var(--surface); }
+
+  .page { padding: 20px 24px 40px; min-width: 0; }
+  .page h1 { font-size: 22px; margin: 0 0 16px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tabbtn {
+    font: inherit; font-size: 15px; color: var(--muted); white-space: nowrap;
+    background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 12px; cursor: pointer;
+  }
+  .tabbtn[aria-current="true"] { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+
+  .blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .block { background: var(--surface); border: 1px solid var(--line); border-radius: 2px; padding: 12px 14px 14px; min-height: 140px; }
+  .block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .block h2 { font-size: 15px; margin: 0; }
+  .kind { font-size: 13px; color: var(--muted); }
+  .ph { display: grid; gap: 9px; }
+  .ph span { display: block; height: 10px; background: var(--ph); border-radius: 2px; }
+  .ph span:nth-child(2) { width: 80%; }
+  .ph span:nth-child(3) { width: 90%; }
+  .ph span:nth-child(4) { width: 60%; }
+  .ph-box { height: 88px; background: var(--ph); border-radius: 2px; }
+  .rows { list-style: none; margin: 0; padding: 0; }
+  .rows li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .rows li:first-child { border-top: 0; padding-top: 0; }
+  .rowlink {
+    font: inherit; text-align: left; color: var(--text); text-decoration: underline; text-underline-offset: 2px;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  .meta { font-size: 14px; color: var(--muted); }
+
+  /* Study screens */
+  .narrow { max-width: 680px; margin: 0 auto; padding: 40px 20px 56px; }
+  .narrow.wide { max-width: 860px; }
+  .narrow h1 { font-size: 24px; margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  fieldset { border: 1px solid var(--line); border-radius: 2px; margin: 0 0 20px; padding: 10px 16px 14px; }
+  legend { font-weight: 600; padding: 0 4px; }
+  .choice { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; }
+  .choice input { width: 18px; height: 18px; margin: 0; }
+  .qlabel { display: block; font-weight: 600; margin: 0 0 6px; }
+  textarea { display: block; width: 100%; min-height: 96px; margin: 0 0 20px; font: inherit; padding: 8px; border: 1px solid var(--line-strong); border-radius: 2px; }
+  .error { font-weight: 600; border-left: 4px solid var(--text); padding: 4px 10px; }
+  .error[hidden] { display: none; }
+  .rec { border-top: 1px solid var(--line); padding: 16px 0; }
+  .rec h3 { font-size: 16px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; }
+  .clicks { margin: 8px 0 0; padding-left: 22px; font-size: 14px; }
+
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidenav { border-right: 0; border-bottom: 1px solid var(--line); padding: 0; overflow-x: auto; }
+    .sidenav ul { display: flex; }
+    .navbtn { border-left: 0; border-bottom: 3px solid transparent; white-space: nowrap; padding: 10px 12px; }
+    .navbtn[aria-current="page"] { border-bottom-color: var(--accent); }
+    .page { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+var VARIANT = "1"; // "1" = data assets inside AI Control Tower, "2" = separate Data Governance product
+// Off for AI-moderated sessions, where the moderator asks this aloud. Set to true for unmoderated runs.
+var ASK_EXPECTATION = false;
+
+var TASKS = [
+  { id: 1, text: "You are concerned that an AI agent your team built could reach sensitive data it should not. Find where you would check which data that AI agent can reach." },
+  { id: 2, text: "You want to know whether the data an AI agent can reach meets your organization\u2019s requirements, such as quality and regulatory rules, and what you could do if it falls short. Find where you would look." },
+  { id: 3, text: "You are setting up a new AI agent and need trusted data to give it. Find where you would look for suitable data." },
+  { id: 4, text: "Before an AI agent uses a customer table, you want to check whether that data is ready to be used right now. Find where you would set that up or check it." },
+  { id: 5, text: "A shared dashboard shows transaction data, and no AI agent is involved. Find where you would review who can see it." }
+];
+var RANDOMIZED = [1, 2, 3, 4];
+var FIXED_LAST = [5];
+
+var AGENTS = ["AI agent 1", "AI agent 2", "AI agent 3"];
+var ASSETS = [
+  { name: "Customer table", type: "Table" },
+  { name: "Employee records table", type: "Table" },
+  { name: "Transactions dashboard", type: "Dashboard" },
+  { name: "Orders API", type: "API" },
+  { name: "Pricing file", type: "File" }
+];
+var AGENT_DATA = ["Customer table", "Orders API", "Pricing file"];
+var ACCESSORS = [
+  { text: "AI agent 1", meta: "AI agent" },
+  { text: "Finance analysts", meta: "People" },
+  { text: "Reporting app", meta: "App" }
+];
+var OWNERS = ["AI governance", "Data governance", "Security, risk, or privacy", "More than one team", "Other", "Not sure"];
+
+var PRODUCT_NAME = { aict: "AI Control Tower", dg: "Data Governance" };
+var NAV = {
+  aict: [["overview", "Overview"], ["inventory", "Inventory"], ["risk", "Risk and Compliance"], ["policies", "Policies"], ["audit", "Audit Trail"], ["settings", "Settings"]],
+  dg: [["overview", "Overview"], ["catalog", "Data Catalog"], ["classification", "Classification"], ["access", "Access"], ["compliance", "Compliance"], ["audit", "Audit Trail"], ["settings", "Settings"]]
+};
+var AGENT_TABS = [["summary", "Summary"], ["access", "Data Access"], ["risk", "Risk"], ["activity", "Activity"]];
+
+function inventoryTabs() {
+  var t = [["agents", "AI Agents"], ["apps", "Apps"], ["content", "Generated Content"]];
+  if (VARIANT === "1") t.push(["data", "Data Assets"]);
+  return t;
+}
+
+var state = {
+  screen: "landing", product: "aict", page: "overview", tab: null, agentTab: "summary", entity: null,
+  menuOpen: false, order: [], idx: 0, taskStart: 0, clicks: [], pending: null, results: []
+};
+
+/* ---------- helpers ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x;
+  }
+  return a;
+}
+function labelOf(list, key) { for (var i = 0; i < list.length; i++) if (list[i][0] === key) return list[i][1]; return key; }
+function taskById(id) { for (var i = 0; i < TASKS.length; i++) if (TASKS[i].id === id) return TASKS[i]; return null; }
+function assetType(name) { for (var i = 0; i < ASSETS.length; i++) if (ASSETS[i].name === name) return ASSETS[i].type; return ""; }
+function fmt(ms) { var s = Math.round(ms / 1000); var m = Math.floor(s / 60); var r = s % 60; return m + ":" + (r < 10 ? "0" : "") + r; }
+function now() { return Date.now(); }
+function B(label, kind) { return { label: label, kind: kind }; }
+function R(label, kind, rows) { return { label: label, kind: kind, rows: rows }; }
+function assetRows() { return ASSETS.map(function (a) { return { text: a.name, act: "open-asset", meta: a.type }; }); }
+
+/* ---------- screens and content (identical in both versions except where data assets live) ---------- */
+function agentView() {
+  var blocksByTab = {
+    summary: [B("Summary", "List"), B("Status", "Chart")],
+    access: [
+      R("Data this AI agent can reach", "Table", AGENT_DATA.map(function (n) { return { text: n, act: "open-asset", meta: assetType(n) }; })),
+      B("Data this AI agent used", "Table"), B("Readiness", "Chart"), B("Recommended actions", "List")
+    ],
+    risk: [B("Risk", "Chart"), B("Findings", "List")],
+    activity: [B("Activity log", "Table"), B("Filters", "List")]
+  };
+  return { title: state.entity.name, tabs: AGENT_TABS, activeTab: state.agentTab, tabAct: "agenttab", blocks: blocksByTab[state.agentTab] };
+}
+
+function assetView() {
+  return {
+    title: state.entity.name,
+    blocks: [
+      R("Owner and classification", "List", [{ text: "Owner: [Name]" }, { text: "Classification: [Level]" }]),
+      R("Who and what can access it", "List", ACCESSORS),
+      B("Compliance and readiness", "Chart"),
+      B("Activity", "List")
+    ]
+  };
+}
+
+function inventoryView() {
+  var tab = state.tab || "agents";
+  var blocks = {
+    agents: [R("AI agents", "Table", AGENTS.map(function (a) { return { text: a, act: "open-agent" }; })), B("Filters", "List")],
+    apps: [B("Apps", "Table"), B("Filters", "List")],
+    content: [B("Generated content", "Table"), B("Filters", "List")],
+    data: [R("Data assets", "Table", assetRows()), B("Filters", "List")]
+  };
+  return { title: "Inventory", tabs: inventoryTabs(), activeTab: tab, tabAct: "tab", blocks: blocks[tab] };
+}
+
+function getView() {
+  if (state.entity && state.entity.type === "agent") return agentView();
+  if (state.entity && state.entity.type === "asset") return assetView();
+  if (state.product === "aict") {
+    switch (state.page) {
+      case "overview": return { title: "Overview", blocks: [B("Summary", "Chart"), B("Recent alerts", "List"), B("Items needing review", "List")] };
+      case "inventory": return inventoryView();
+      case "risk": return { title: "Risk and Compliance", blocks: [B("Risk overview", "Chart"), B("Compliance checks", "Table"), B("Open issues", "List")] };
+      case "policies": return { title: "Policies", blocks: [B("Policy list", "Table"), B("Policy assignments", "List")] };
+      case "audit": return { title: "Audit Trail", blocks: [B("Event log", "Table"), B("Filters", "List")] };
+      case "settings": return { title: "Settings", blocks: [B("General", "List"), B("Connections", "List")] };
+    }
+  } else {
+    switch (state.page) {
+      case "overview": return { title: "Overview", blocks: [B("Summary", "Chart"), B("Recent changes", "List"), B("Items needing review", "List")] };
+      case "catalog": return { title: "Data Catalog", blocks: [R("Data assets", "Table", assetRows()), B("Filters", "List")] };
+      case "classification": return { title: "Classification", blocks: [B("Classification rules", "Table"), B("Unclassified data", "List")] };
+      case "access": return { title: "Access", blocks: [B("Access reviews", "Table"), B("Access requests", "List")] };
+      case "compliance": return { title: "Compliance", blocks: [B("Compliance checks", "Table"), B("Open issues", "List")] };
+      case "audit": return { title: "Audit Trail", blocks: [B("Event log", "Table"), B("Filters", "List")] };
+      case "settings": return { title: "Settings", blocks: [B("General", "List"), B("Connections", "List")] };
+    }
+  }
+  return { title: "Overview", blocks: [B("Summary", "Chart"), B("Recent alerts", "List")] };
+}
+
+function pathLabel() {
+  var parts = [PRODUCT_NAME[state.product], labelOf(NAV[state.product], state.page)];
+  if (state.product === "aict" && state.page === "inventory") parts.push(labelOf(inventoryTabs(), state.tab || "agents"));
+  if (state.entity) parts.push(state.entity.name);
+  if (state.entity && state.entity.type === "agent") parts.push(labelOf(AGENT_TABS, state.agentTab));
+  return parts.join(" > ");
+}
+
+/* ---------- state changes ---------- */
+function log(label) { state.clicks.push({ ms: now() - state.taskStart, label: label, path: pathLabel() }); }
+
+function resetLocation() {
+  state.product = "aict"; state.page = "overview"; state.tab = null; state.agentTab = "summary";
+  state.entity = null; state.menuOpen = false;
+}
+
+// Applies one participant action. Returns true when the screen location changed.
+function apply(act, id) {
+  switch (act) {
+    case "nav":
+      state.page = id; state.tab = null; state.entity = null; state.agentTab = "summary"; state.menuOpen = false;
+      log("Menu: " + labelOf(NAV[state.product], id)); return true;
+    case "tab":
+      state.tab = id; state.entity = null; log("Tab: " + labelOf(inventoryTabs(), id)); return true;
+    case "agenttab":
+      state.agentTab = id; log("Tab: " + labelOf(AGENT_TABS, id)); return true;
+    case "open-agent":
+      state.tab = "agents"; state.entity = { type: "agent", name: id }; state.agentTab = "summary"; log("Open: " + id); return true;
+    case "open-asset":
+      var from = state.product;
+      if (VARIANT === "1") { state.product = "aict"; state.page = "inventory"; state.tab = "data"; }
+      else { state.product = "dg"; state.page = "catalog"; state.tab = null; }
+      state.entity = { type: "asset", name: id }; state.menuOpen = false;
+      log("Open: " + id + (from !== state.product ? " (moved to " + PRODUCT_NAME[state.product] + " by link)" : "")); return true;
+    case "menu":
+      state.menuOpen = !state.menuOpen; if (state.menuOpen) log("Opened product switcher"); return false;
+    case "product":
+      state.product = id; state.page = "overview"; state.tab = null; state.entity = null; state.menuOpen = false;
+      log("Product switcher: " + PRODUCT_NAME[id]); return true;
+  }
+  return false;
+}
+
+function startStudy() {
+  state.order = shuffle(RANDOMIZED.slice()).concat(FIXED_LAST);
+  state.idx = 0; state.results = [];
+  beginTask();
+}
+function beginTask() {
+  resetLocation(); state.clicks = []; state.taskStart = now(); state.screen = "task";
+  paint(".task-text");
+}
+function finishTask(outcome) {
+  var id = state.order[state.idx];
+  var ms = now() - state.taskStart;
+  var clicks = state.clicks.slice();
+  clicks.push({ ms: ms, label: outcome === "chose" ? "Selected: This is where I\u2019d look" : "Selected: I can\u2019t find it", path: pathLabel() });
+  state.pending = { taskId: id, text: taskById(id).text, outcome: outcome, chosenPath: outcome === "chose" ? pathLabel() : null, clicks: clicks, ms: ms };
+  state.screen = "followup";
+  paint("h1");
+}
+function recordFollowup(confidence, owner, expect) {
+  var r = state.pending;
+  r.confidence = r.outcome === "chose" ? confidence : null;
+  r.owner = owner;
+  r.expect = expect || "";
+  state.results.push(r); state.pending = null; state.idx++;
+  if (state.idx < state.order.length) beginTask();
+  else { state.screen = "final"; paint("h1"); }
+}
+
+/* ---------- markup ---------- */
+function landingHTML() {
+  return '<main class="narrow" id="main">' +
+    '<h1 tabindex="-1">Concept study</h1>' +
+    '<p>This is an early concept with placeholder content. There are no right or wrong answers. Click where you would expect to find each thing.</p>' +
+    '<p class="muted">You will get ' + TASKS.length + ' short tasks, shown in a bar at the top of the screen. For each one, use the menus to go to the screen where you would look first, then select \u201cThis is where I\u2019d look.\u201d If nothing fits, select \u201cI can\u2019t find it.\u201d Each task starts from the same home screen. Please say what you are thinking as you go.</p>' +
+    '<button type="button" class="btn primary" data-act="start">Start</button>' +
+    '</main>';
+}
+
+function blockHTML(b) {
+  var inner;
+  if (b.rows) {
+    inner = '<ul class="rows">' + b.rows.map(function (r) {
+      var main = r.act
+        ? '<button type="button" class="rowlink" data-act="' + r.act + '" data-id="' + esc(r.text) + '">' + esc(r.text) + '</button>'
+        : '<span>' + esc(r.text) + '</span>';
+      return '<li>' + main + (r.meta ? '<span class="meta">' + esc(r.meta) + '</span>' : '') + '</li>';
+    }).join("") + '</ul>';
+  } else if (b.kind === "Chart") {
+    inner = '<div class="ph-box" aria-hidden="true"></div>';
+  } else {
+    inner = '<div class="ph" aria-hidden="true"><span></span><span></span><span></span><span></span></div>';
+  }
+  return '<section class="block" aria-label="' + esc(b.label) + '">' +
+    '<div class="block-head"><h2>' + esc(b.label) + '</h2><span class="kind">' + esc(b.kind) + '</span></div>' +
+    inner + '</section>';
+}
+
+function productHTML() {
+  if (VARIANT !== "2") return '<span class="product-name">AI Control Tower</span>';
+  var menu = "";
+  if (state.menuOpen) {
+    menu = '<ul class="switcher-menu" id="product-menu">' + ["aict", "dg"].map(function (p) {
+      return '<li><button type="button" data-act="product" data-id="' + p + '"' + (state.product === p ? ' aria-current="true"' : '') + '>' +
+        esc(PRODUCT_NAME[p]) + (p === "dg" ? '<span class="sub">Workflow Data Fabric</span>' : '') + '</button></li>';
+    }).join("") + '</ul>';
+  }
+  return '<div class="switcher"><button type="button" class="switcher-btn" data-act="menu" aria-expanded="' + state.menuOpen + '" aria-controls="product-menu">' +
+    esc(PRODUCT_NAME[state.product]) + ' <span aria-hidden="true">\u25BE</span></button>' + menu + '</div>';
+}
+
+function taskHTML() {
+  var t = taskById(state.order[state.idx]);
+  var v = getView();
+  var nav = NAV[state.product].map(function (n) {
+    return '<li><button type="button" class="navbtn" data-act="nav" data-id="' + n[0] + '"' + (state.page === n[0] ? ' aria-current="page"' : '') + '>' + esc(n[1]) + '</button></li>';
+  }).join("");
+  var tabs = "";
+  if (v.tabs) {
+    tabs = '<div class="tabs" role="group" aria-label="Sections">' + v.tabs.map(function (tb) {
+      return '<button type="button" class="tabbtn" data-act="' + v.tabAct + '" data-id="' + tb[0] + '"' + (v.activeTab === tb[0] ? ' aria-current="true"' : '') + '>' + esc(tb[1]) + '</button>';
+    }).join("") + '</div>';
+  }
+  return '<header class="banner" aria-label="Current task"><div class="banner-inner">' +
+      '<p class="task-count">Task ' + (state.idx + 1) + ' of ' + state.order.length + '</p>' +
+      '<p class="task-text" tabindex="-1">' + esc(t.text) + '</p>' +
+      '<div class="banner-actions">' +
+        '<button type="button" class="btn" data-act="cantfind">I can\u2019t find it</button>' +
+        '<button type="button" class="btn primary" data-act="here">This is where I\u2019d look</button>' +
+      '</div></div></header>' +
+    '<div class="shell">' +
+      '<div class="topbar">' + productHTML() + '</div>' +
+      '<div class="layout">' +
+        '<nav class="sidenav" aria-label="' + esc(PRODUCT_NAME[state.product]) + '"><ul>' + nav + '</ul></nav>' +
+        '<main class="page" id="main"><h1 tabindex="-1">' + esc(v.title) + '</h1>' + tabs +
+          '<div class="blocks">' + v.blocks.map(blockHTML).join("") + '</div></main>' +
+      '</div></div>';
+}
+
+function followupHTML() {
+  var chose = state.pending.outcome === "chose";
+  var conf = [1, 2, 3, 4, 5].map(function (n) {
+    var l = n === 1 ? "1 - Not at all confident" : n === 5 ? "5 - Very confident" : String(n);
+    return '<label class="choice"><input type="radio" name="conf" value="' + n + '"> ' + l + '</label>';
+  }).join("");
+  var owners = OWNERS.map(function (o) {
+    return '<label class="choice"><input type="radio" name="owner" value="' + esc(o) + '"> ' + esc(o) + '</label>';
+  }).join("");
+  return '<main class="narrow" id="main">' +
+    '<p class="task-count">Task ' + (state.idx + 1) + ' of ' + state.order.length + '</p>' +
+    '<h1 tabindex="-1">' + (chose ? "Two quick questions" : "One quick question") + '</h1>' +
+    (chose ? '<fieldset><legend>How confident are you that this is the right place?</legend>' + conf + '</fieldset>' : '') +
+    (chose && ASK_EXPECTATION ? '<label for="expect" class="qlabel">What did you expect to find here?</label><textarea id="expect"></textarea>' : '') +
+    '<fieldset><legend>Which team do you expect to be responsible for this task?</legend>' + owners + '</fieldset>' +
+    '<p class="error" id="fu-error" role="alert" hidden>Choose an answer for each question to continue.</p>' +
+    '<button type="button" class="btn primary" data-act="submit-followup">Continue</button>' +
+    '</main>';
+}
+
+function finalHTML() {
+  var recs = state.results.map(function (r, i) {
+    var meta = (r.confidence != null ? '<strong>Confidence:</strong> ' + r.confidence + ' of 5. ' : '') +
+      '<strong>Expected team:</strong> ' + esc(r.owner) + '. <strong>Time:</strong> ' + fmt(r.ms);
+    return '<section class="rec">' +
+      '<h3>Task ' + (i + 1) + ' (ID ' + r.taskId + '): ' + esc(r.text) + '</h3>' +
+      '<p><strong>Result:</strong> ' + (r.outcome === "chose" ? esc(r.chosenPath) : "Couldn\u2019t find it") + '</p>' +
+      '<p>' + meta + '</p>' +
+      (r.expect ? '<p><strong>Expected to find:</strong> ' + esc(r.expect) + '</p>' : '') +
+      '<ol class="clicks">' + r.clicks.map(function (c) {
+        return '<li>' + fmt(c.ms) + ' ' + esc(c.label) + ' <span class="meta">(' + esc(c.path) + ')</span></li>';
+      }).join("") + '</ol></section>';
+  }).join("");
+  return '<main class="narrow wide" id="main">' +
+    '<h1 tabindex="-1">You\u2019re done. Thank you.</h1>' +
+    '<p>If you are talking with a moderator, let them know you have finished.</p>' +
+    '<h2>Session record</h2>' +
+    '<p class="muted">This record helps the research team. You don\u2019t need to do anything with it.</p>' +
+    recs +
+    '<p class="muted">Version ' + VARIANT + '. Task order by ID: ' + state.order.join(", ") + '.</p>' +
+    '</main>';
+}
+
+/* ---------- browser wiring ---------- */
+function html() {
+  if (state.screen === "landing") return landingHTML();
+  if (state.screen === "task") return taskHTML();
+  if (state.screen === "followup") return followupHTML();
+  return finalHTML();
+}
+function paint(focusSel) {
+  if (typeof document === "undefined") return;
+  document.getElementById("app").innerHTML = html();
+  if (focusSel) { var el = document.querySelector(focusSel); if (el) el.focus(); }
+}
+
+function submitFollowup() {
+  var chose = state.pending.outcome === "chose";
+  var confEl = document.querySelector('input[name="conf"]:checked');
+  var ownerEl = document.querySelector('input[name="owner"]:checked');
+  if ((chose && !confEl) || !ownerEl) {
+    document.getElementById("fu-error").hidden = false;
+    var first = (chose && !confEl) ? document.querySelector('input[name="conf"]') : document.querySelector('input[name="owner"]');
+    if (first) first.focus();
+    return;
+  }
+  var ex = document.getElementById("expect");
+  recordFollowup(confEl ? Number(confEl.value) : null, ownerEl.value, ex ? ex.value.trim() : "");
+}
+
+function onClick(e) {
+  var el = e.target.closest("[data-act]");
+  if (!el) {
+    if (state.menuOpen) { state.menuOpen = false; paint(null); }
+    return;
+  }
+  var act = el.getAttribute("data-act");
+  var id = el.getAttribute("data-id");
+  if (act === "start") return startStudy();
+  if (act === "here") return finishTask("chose");
+  if (act === "cantfind") return finishTask("cant_find");
+  if (act === "submit-followup") return submitFollowup();
+  if (act === "menu") {
+    apply("menu");
+    paint(state.menuOpen ? ".switcher-menu button" : ".switcher-btn");
+    return;
+  }
+  if (apply(act, id)) paint("h1");
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("click", onClick);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && state.menuOpen) { state.menuOpen = false; paint(".switcher-btn"); }
+  });
+  paint(null);
+}
+</script>
+</body>
+</html>
